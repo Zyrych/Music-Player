@@ -1,3 +1,6 @@
+import java.io.File;
+import java.util.List;
+
 public class Controller {
     private View view;
 
@@ -8,9 +11,13 @@ public class Controller {
 
     private void setupMenuButtonListener() {
         view.getSongsBtn().addActionListener(e -> {
-            System.out.println("1");
-            view.setContentPane(view.createSongsContent());
-            System.out.println("1");
+            if (view.areAudioFilesFound()) {
+                List<File> audioFiles = view.getFoundAudioFiles();
+                view.displayAudioFiles(audioFiles);
+            } else {
+                // Display the default songs content panel
+                view.setContentPane(view.createSongsContent());
+            }
         });
 
         view.getPlaylistsBtn().addActionListener(e -> {
