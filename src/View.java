@@ -4,8 +4,9 @@ import java.awt.*;
 public class View {
     private JFrame frame;
     private JPanel menuPanel;
-    private JButton songsButton, playlistButton, queueButton;
+    private JButton songsButton, playlistButton, queueButton, selectFolderButton;
     private JPanel contentPanel;
+    private JLabel songsSubHeader;
 
     public View() {
         createFrame();
@@ -72,15 +73,29 @@ public class View {
         return queueButton;
     }
 
-    // Method to create Songs content
+
+    public JButton getSelectFolderBtn() {
+        return selectFolderButton;
+    }
+
+
     public Component createSongsContent() {
         JPanel panel = new JPanel();
+
+        JLabel songsHeader = new JLabel("Songs");
+        songsSubHeader = new JLabel("No Music In Selected Directory");
+        selectFolderButton = new JButton("Select Folder"); 
+
+        setupSelectFolderButtonListener();
+
+        panel.add(songsHeader);
+        panel.add(songsSubHeader);
+        panel.add(selectFolderButton);
         panel.setBackground(Color.RED);
-        panel.add(new JLabel("Songs Content"));
         return panel;
     }
 
-    // Method to create Playlist content
+
     public Component createPlaylistContent() {
         JPanel panel = new JPanel();
         panel.setBackground(Color.GREEN);
@@ -88,11 +103,19 @@ public class View {
         return panel;
     }
 
-    // Method to create Queue content
+
     public Component createQueueContent() {
         JPanel panel = new JPanel();
         panel.setBackground(Color.PINK);
         panel.add(new JLabel("Queue Content"));
         return panel;
+    }
+
+
+    private void setupSelectFolderButtonListener() {
+        selectFolderButton.addActionListener(e -> {
+            System.out.println("Select Folder button clicked");
+            
+        });
     }
 }
