@@ -1,10 +1,17 @@
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.sound.sampled.*;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 
 
@@ -26,6 +33,8 @@ public class View {
         createPlaybackPanel();
         handleSongsButtonClick();
         frame.setVisible(true);
+
+        
 
     }
 
@@ -279,19 +288,17 @@ public class View {
 
 
     private void playAudio(File audioFile) {
-        try {
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-            if (audioStream == null) {
-                JOptionPane.showMessageDialog(frame, "Unsupported audio file format.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioStream);
-            clip.start();
-        } catch (UnsupportedAudioFileException | LineUnavailableException | IOException ex) {
-            JOptionPane.showMessageDialog(frame, "Unsupported audio file format.", "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-        }
+        // Convert the file to URL format
+        String audioPath = audioFile.toURI().toString();
+
+        // Create a JavaFX Media object
+        Media media = new Media(audioPath);
+
+        // Create a JavaFX MediaPlayer
+        MediaPlayer mediaPlayer = new MediaPlayer(media);
+
+        // Play the audio
+        mediaPlayer.play();
     }
 
 
