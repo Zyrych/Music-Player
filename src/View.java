@@ -1,26 +1,37 @@
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.sound.sampled.*;
+
+
 
 public class View {
     private JFrame frame;
-    private JPanel menuPanel;
-    private JButton songsButton, playlistButton, queueButton, selectFolderButton;
-    private JPanel contentPanel;
+    private JPanel menuPanel, contentPanel, playbackPanel;
+    private JButton songsButton, playlistButton, queueButton, selectFolderButton, playButton, nextButton, previousButton;
     private JLabel songsSubHeader;
     private boolean audioFilesFound = false;
     private List<File> foundAudioFiles;
+    private File selectedAudioFile;
+    
 
     public View() {
+        
         createFrame();
         createMenuPanel();
         createContentPanel(); 
+        createPlaybackPanel();
         handleSongsButtonClick();
         frame.setVisible(true);
 
     }
+
+
+    
+
 
     private void handleSongsButtonClick() {
         Component songsContent = createSongsContent();
@@ -53,11 +64,27 @@ public class View {
         frame.add(menuPanel, BorderLayout.WEST);
     }
 
+
+    public void createPlaybackPanel() {
+        playbackPanel = new JPanel();
+        playbackPanel.setBackground(Color.yellow);
+        playbackPanel.setPreferredSize(new Dimension(900, 150));
+        playbackPanel.setLayout(new FlowLayout());
+        playButton = new JButton("Play");
+
+        playbackPanel.add(playButton);
+        frame.add(playbackPanel, BorderLayout.SOUTH);
+        setupPlayButtonListener();
+    }
+
+
     public void createContentPanel() {
         contentPanel = new JPanel();
         contentPanel.setLayout(new BorderLayout());
+
         frame.add(contentPanel, BorderLayout.CENTER);
     }
+
 
     public void setContentPane(Component component) {
         contentPanel.removeAll();
@@ -66,13 +93,16 @@ public class View {
         contentPanel.repaint();
     }
 
+
     public JButton getSongsBtn() {
         return songsButton;
     }
 
+
     public JButton getPlaylistsBtn() {
         return playlistButton;
     }
+
 
     public JButton getQueueBtn() {
         return queueButton;
@@ -81,6 +111,11 @@ public class View {
 
     public JButton getSelectFolderBtn() {
         return selectFolderButton;
+    }
+
+
+    public JButton getPlayButton() {
+        return playButton;
     }
 
 
@@ -181,23 +216,41 @@ public class View {
     void displayAudioFiles(List<File> audioFiles) {
         // Clear existing content in songs content panel
         contentPanel.removeAll();
-
+    
         // Create a panel to display audio files
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-
+        JPanel panel = new JPanel(new BorderLayout());
+    
         JLabel songsHeader = new JLabel("Songs: ");
-        panel.add(songsHeader);
-
-        // Add audio files to the panel
+        panel.add(songsHeader, BorderLayout.NORTH);
+    
+        // Create a list model to hold audio file names
+        DefaultListModel<String> listModel = new DefaultListModel<>();
         for (File file : audioFiles) {
-            JButton button = new JButton(file.getName());
-            panel.add(button);
+            listModel.addElement(file.getName());
         }
-
+    
+        // Create a JList with the list model
+        JList<String> fileList = new JList<>(listModel);
+        fileList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    
+        // Add the JList to a scroll pane
+        JScrollPane scrollPane = new JScrollPane(fileList);
+        panel.add(scrollPane, BorderLayout.CENTER);
+    
+        // Add a selection listener to handle item selection
+        fileList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedIndex = fileList.getSelectedIndex();
+                if (selectedIndex != -1) {
+                    selectedAudioFile = audioFiles.get(selectedIndex); // Update selectedAudioFile
+                }
+            }
+        });
+    
         // Set the panel as the content of the songs content panel
         setContentPane(panel);
     }
+    
 
 
     public void setAudioFilesFound(boolean found) {
@@ -211,6 +264,34 @@ public class View {
 
     public List<File> getFoundAudioFiles() {
         return foundAudioFiles;
+    }
+
+
+    private void setupPlayButtonListener() {
+        playButton.addActionListener(e -> {
+            if (selectedAudioFile != null) {
+                playAudio(selectedAudioFile);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Please select an audio file to play.", "No Audio Selected", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+    }
+
+
+    private void playAudio(File audioFile) {
+        try {
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
+            if (audioStream == null) {
+                JOptionPane.showMessageDialog(frame, "Unsupported audio file format.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.start();
+        } catch (UnsupportedAudioFileException | LineUnavailableException | IOException ex) {
+            JOptionPane.showMessageDialog(frame, "Unsupported audio file format.", "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 
 

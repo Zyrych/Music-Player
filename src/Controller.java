@@ -1,5 +1,8 @@
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
+
+import javax.swing.JOptionPane;
 
 public class Controller {
     private View view;
@@ -31,6 +34,11 @@ public class Controller {
             view.setContentPane(view.createQueueContent());
             System.out.println("3");
         });
+    }
+
+
+    private void setupPlayButtonListener() {
+
     }
 
     
